@@ -25,8 +25,9 @@ Shader "Unlit/PrettyWater"
 
             struct v2f
             {
-                float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float3 normal : TEXCOORD1;
             };
 
             struct Wave {
@@ -40,30 +41,48 @@ Shader "Unlit/PrettyWater"
             sampler2D _MainTex;
             float4 _MainTex_ST;
             int _WaveNumber;
+            float3 _SunDirection;
 			
 			StructuredBuffer<Wave> _Waves;
+
+            float3 getNormal(Wave wave, float3 vPos){
+                // sin(x)' = x'cos(x)
+                float xzDisplacement = vPos.x * wave.direction.x + vPos.z * wave.direction.y;
+                // float xDerivative = wave.frequency * wave.direction.x * wave.amplitude * cos(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
+                float xDerivative = wave.frequency * wave.direction.x * wave.amplitude * cos(xzDisplacement * wave.frequency + wave.phase * wave.speed);
+                float3 tangentVector = float3(1, 0, xDerivative);
+                // float zDerivative = wave.frequency * wave.direction.y * wave.amplitude * cos(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
+                float zDerivative = wave.frequency * wave.direction.y * wave.amplitude * cos(xzDisplacement * wave.frequency + wave.phase * wave.speed);
+                float3 binormalVector = float3(0, 1, zDerivative);
+                return cross(tangentVector, binormalVector);
+            }
 
             v2f vert (VertexData v)
             {
                 v2f o;
                 o.vertex = mul(unity_ObjectToWorld, v.vertex); // get vertex world position
                 float heightOffset = 0.0;
+                float3 finalNormal = float3(0.0, 0.0, 0.0);
                 for (int i = 0; i < _WaveNumber; i++) {
                     Wave wave = _Waves[i];
+                    // displacement depends on the X and Z position
                     float xzDisplacement = o.vertex.x * wave.direction.x + o.vertex.z * wave.direction.y;
-                    heightOffset += wave.amplitude * sin(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
+                    // heightOffset += wave.amplitude * sin(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
+                    heightOffset += wave.amplitude * sin(xzDisplacement * wave.frequency + wave.phase * wave.speed);
+                    finalNormal += getNormal(wave, o.vertex);
                 }
+                float3 normalizedNormal = normalize(finalNormal);
+                o.normal = normalizedNormal;
                 o.vertex.y += heightOffset;
                 o.vertex = UnityObjectToClipPos(o.vertex); // clip to world position
-                o.uv = v.uv;
                 
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            float4 frag (v2f i) : SV_Target
             {
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
+                float4 col = float4(i.normal.x, i.normal.y, i.normal.z, 1.0);
                 return col;
             }
             ENDCG

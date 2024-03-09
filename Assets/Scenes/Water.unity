@@ -406,13 +406,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waveNumber: 64
-  maxSpeed: 40
-  amplitudeDampening: 1
-  maxAmplitude: 1
+  maxSpeed: 30
+  maxAmplitude: 10
   minWaveLength: 0.5
-  maxWaveLength: 5
+  maxWaveLength: 10
   minPhase: 0.5
-  maxPhase: 5
+  maxPhase: 10
   waveMat: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
