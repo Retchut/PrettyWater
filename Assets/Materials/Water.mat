@@ -64,6 +64,7 @@ Material:
     - _Amplitude: 0.2
     - _BumpScale: 1
     - _Cutoff: 0.5
+    - _Dampening: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _Frequency: 10

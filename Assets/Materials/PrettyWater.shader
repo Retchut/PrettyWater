@@ -39,24 +39,20 @@ Shader "Unlit/PrettyWater"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            int _WaveNumber;
 			
 			StructuredBuffer<Wave> _Waves;
 
             v2f vert (VertexData v)
             {
-                Wave test;
-                test.direction = float2(1,1);
-                test.speed = 30.0;
-                test.amplitude = 0.2;
-                test.frequency = 10.0;
-                test.phase = 5.0;
-
                 v2f o;
                 o.vertex = mul(unity_ObjectToWorld, v.vertex); // get vertex world position
                 float heightOffset = 0.0;
-                // for (int wi = 0; wi < _WaveCount; ++wi) {
-                float xzDisplacement = o.vertex.x * test.direction.x + o.vertex.z * test.direction.y;
-                heightOffset += test.amplitude * sin(xzDisplacement * test.frequency + test.phase * _Time * test.speed);
+                for (int i = 0; i < _WaveNumber; i++) {
+                    Wave wave = _Waves[i];
+                    float xzDisplacement = o.vertex.x * wave.direction.x + o.vertex.z * wave.direction.y;
+                    heightOffset += wave.amplitude * sin(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
+                }
                 o.vertex.y += heightOffset;
                 o.vertex = UnityObjectToClipPos(o.vertex); // clip to world position
                 o.uv = v.uv;
