@@ -16,6 +16,9 @@ Shader "Unlit/PrettyWater"
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+            #include "Lighting.cginc"
+            
+			#define PI 3.14159265358979323846
 
             struct VertexData
             {
@@ -26,7 +29,7 @@ Shader "Unlit/PrettyWater"
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-                float2 uv : TEXCOORD0;
+                float3 uv : TEXCOORD0;
                 float3 normal : TEXCOORD1;
             };
 
@@ -42,19 +45,19 @@ Shader "Unlit/PrettyWater"
             float4 _MainTex_ST;
             int _WaveNumber;
             float3 _SunDirection;
+            float3 _WaterColor;
+            float3 _AmbientColor;
+            float _DiffuseCoeff;
 			
 			StructuredBuffer<Wave> _Waves;
 
-            float3 getNormal(Wave wave, float3 vPos){
+
+            float3 getPartialDerivatives(Wave wave, float3 vPos){
                 // sin(x)' = x'cos(x)
                 float xzDisplacement = vPos.x * wave.direction.x + vPos.z * wave.direction.y;
-                // float xDerivative = wave.frequency * wave.direction.x * wave.amplitude * cos(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
-                float xDerivative = wave.frequency * wave.direction.x * wave.amplitude * cos(xzDisplacement * wave.frequency + wave.phase * wave.speed);
-                float3 tangentVector = float3(1, 0, xDerivative);
-                // float zDerivative = wave.frequency * wave.direction.y * wave.amplitude * cos(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
-                float zDerivative = wave.frequency * wave.direction.y * wave.amplitude * cos(xzDisplacement * wave.frequency + wave.phase * wave.speed);
-                float3 binormalVector = float3(0, 1, zDerivative);
-                return cross(tangentVector, binormalVector);
+                float xDerivative = wave.frequency * wave.direction.x * wave.amplitude * cos(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
+                float zDerivative = wave.frequency * wave.direction.y * wave.amplitude * cos(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
+                return float3(xDerivative, 0.0f, zDerivative);
             }
 
             v2f vert (VertexData v)
@@ -62,16 +65,17 @@ Shader "Unlit/PrettyWater"
                 v2f o;
                 o.vertex = mul(unity_ObjectToWorld, v.vertex); // get vertex world position
                 float heightOffset = 0.0;
-                float3 finalNormal = float3(0.0, 0.0, 0.0);
+                float3 derivatives = float3(0.0, 0.0, 0.0);
                 for (int i = 0; i < _WaveNumber; i++) {
                     Wave wave = _Waves[i];
+                    wave.direction = normalize(wave.direction);
                     // displacement depends on the X and Z position
                     float xzDisplacement = o.vertex.x * wave.direction.x + o.vertex.z * wave.direction.y;
-                    // heightOffset += wave.amplitude * sin(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
-                    heightOffset += wave.amplitude * sin(xzDisplacement * wave.frequency + wave.phase * wave.speed);
-                    finalNormal += getNormal(wave, o.vertex);
+                    heightOffset += wave.amplitude * sin(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
+                    derivatives += getPartialDerivatives(wave, o.vertex);
                 }
-                float3 normalizedNormal = normalize(finalNormal);
+                // Tangent vector is (1, d/dx, 0); Binormal vector is (0, d/dz, 1); the cross product can be simplified to (d/dx, -1, d/dz)
+                float3 normalizedNormal = normalize(UnityObjectToWorldNormal(normalize(float3(derivatives.x, 1.0f, derivatives.z))));
                 o.normal = normalizedNormal;
                 o.vertex.y += heightOffset;
                 o.vertex = UnityObjectToClipPos(o.vertex); // clip to world position
@@ -81,9 +85,16 @@ Shader "Unlit/PrettyWater"
 
             float4 frag (v2f i) : SV_Target
             {
-                // sample the texture
-                float4 col = float4(i.normal.x, i.normal.y, i.normal.z, 1.0);
-                return col;
+                float3 lightDir = -normalize(_SunDirection);
+
+                float ndotl = max(0.0, dot(lightDir, i.normal));
+                
+                float3 ambient = _WaterColor * _AmbientColor;
+                float3 diffuseReflectance = _DiffuseCoeff / PI;
+                float3 diffuse = _WaterColor * _LightColor0.rgb * ndotl * diffuseReflectance;
+
+                float3 finalColor = ambient + diffuse;
+                return float4(finalColor, 1.0f);
             }
             ENDCG
         }

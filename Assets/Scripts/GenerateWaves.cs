@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using static System.Runtime.InteropServices.Marshal; // required for SizeOf
 
-public class GenerateWaves : MonoBehaviour
+public class Water : MonoBehaviour
 {
+    // Wave Properties
+    public Color waterColor;
+    public Color ambientColor;
+    public float diffuseCoeff = 0.5f;
     public int waveNumber = 64;
     private int prevWaveNumber = 64;
     private int minDirection = -1;
@@ -23,10 +27,15 @@ public class GenerateWaves : MonoBehaviour
     private float minPhase = 0.5f;
     [SerializeField]
     private float maxPhase = 10f;
+
+    // Buffers
     private ComputeBuffer waveBuffer;
     private Wave[] waves;
+
+    // Scene references
     [SerializeField]
     private Material waveMat;
+    private Transform sun;
 
     private struct Wave
     {
@@ -47,9 +56,14 @@ public class GenerateWaves : MonoBehaviour
 
     void Start()
     {
+        sun = GameObject.FindWithTag("Sun").transform;
         waveMat = GetComponent<Renderer>().material;
         ReGenBuffers();
         ReGenerateWaves();
+        waveMat.SetVector("_SunDirection", sun.forward);
+        waveMat.SetVector("_WaterColor", waterColor);
+        waveMat.SetVector("_AmbientColor", ambientColor);
+        waveMat.SetFloat("_DiffuseCoeff", diffuseCoeff);
     }
 
     // Update is called once per frame
@@ -65,6 +79,11 @@ public class GenerateWaves : MonoBehaviour
         {
             ReGenerateWaves();
         }
+        Debug.Log(sun.forward);
+        waveMat.SetVector("_SunDirection", sun.forward);
+        waveMat.SetVector("_WaterColor", waterColor);
+        waveMat.SetVector("_AmbientColor", ambientColor);
+        waveMat.SetFloat("_DiffuseCoeff", diffuseCoeff);
     }
 
     void ReGenBuffers()
@@ -82,6 +101,7 @@ public class GenerateWaves : MonoBehaviour
             while (direction == Vector2.zero)
             {
                 direction = new Vector2(Random.Range(minDirection, maxDirection), Random.Range(minDirection, maxDirection));
+                // direction = new Vector2(1, 1);
             }
             float speed = Random.Range(minSpeed, maxSpeed);
             float amplitude = Random.Range(minAmplitude, maxAmplitude);

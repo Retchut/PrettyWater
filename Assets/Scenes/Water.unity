@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18380599, g: 0.22911838, b: 0.30411458, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 1083319209}
   m_Layer: 0
   m_Name: Directional Light
-  m_TagString: Untagged
+  m_TagString: Sun
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -210,13 +210,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1083319208}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalRotation: {x: 0.83660674, y: -0.1631005, z: -0.3574934, w: 0.38168818}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 148.531, y: 57.917, z: 39.785995}
 --- !u!1 &1232628275
 GameObject:
   m_ObjectHideFlags: 0
@@ -405,8 +405,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70513d3f2f8a65b4fb682ce595b77aa2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  waterColor: {r: 0.099368125, g: 0.3499007, b: 0.7264151, a: 0}
+  ambientColor: {r: 0.9622642, g: 0.83383673, b: 0.46751517, a: 0}
+  diffuseCoeff: 3
   waveNumber: 64
-  maxSpeed: 30
+  maxSpeed: 1
   maxAmplitude: 10
   minWaveLength: 0.5
   maxWaveLength: 10
