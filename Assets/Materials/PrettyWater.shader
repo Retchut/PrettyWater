@@ -46,6 +46,7 @@ Shader "Unlit/PrettyWater"
             int _WaveNumber;
             float3 _SunDirection;
             float3 _WaterColor;
+            float _AmbientAttenuation;
             float3 _AmbientColor;
             float _DiffuseCoeff;
 			
@@ -63,7 +64,7 @@ Shader "Unlit/PrettyWater"
             v2f vert (VertexData v)
             {
                 v2f o;
-                o.vertex = mul(unity_ObjectToWorld, v.vertex); // get vertex world position
+                o.vertex = mul(unity_ObjectToWorld, v.vertex); // transform to world position
                 float heightOffset = 0.0;
                 float3 derivatives = float3(0.0, 0.0, 0.0);
                 for (int i = 0; i < _WaveNumber; i++) {
@@ -74,8 +75,8 @@ Shader "Unlit/PrettyWater"
                     heightOffset += wave.amplitude * sin(xzDisplacement * wave.frequency + wave.phase * _Time * wave.speed);
                     derivatives += getPartialDerivatives(wave, o.vertex);
                 }
-                // Tangent vector is (1, d/dx, 0); Binormal vector is (0, d/dz, 1); the cross product can be simplified to (d/dx, -1, d/dz)
-                float3 normalizedNormal = normalize(UnityObjectToWorldNormal(normalize(float3(derivatives.x, 1.0f, derivatives.z))));
+                // Tangent vector is (1, d/dx, 0); Binormal vector is (0, d/dz, 1); the cross product can be simplified to (d/dx, -1, d/dz), but we want the normal in the inverse direction
+                float3 normalizedNormal = normalize(UnityObjectToWorldNormal(normalize(-float3(derivatives.x, -1.0f, derivatives.z))));
                 o.normal = normalizedNormal;
                 o.vertex.y += heightOffset;
                 o.vertex = UnityObjectToClipPos(o.vertex); // clip to world position
@@ -89,11 +90,12 @@ Shader "Unlit/PrettyWater"
 
                 float ndotl = max(0.0, dot(lightDir, i.normal));
                 
-                float3 ambient = _WaterColor * _AmbientColor;
+                float3 ambient = _AmbientColor * _AmbientAttenuation;
                 float3 diffuseReflectance = _DiffuseCoeff / PI;
                 float3 diffuse = _WaterColor * _LightColor0.rgb * ndotl * diffuseReflectance;
 
                 float3 finalColor = ambient + diffuse;
+                // float3 finalColor = diffuse;
                 return float4(finalColor, 1.0f);
             }
             ENDCG

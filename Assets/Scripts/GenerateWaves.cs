@@ -7,6 +7,7 @@ public class Water : MonoBehaviour
 {
     // Wave Properties
     public Color waterColor;
+    public float ambientAttenuation;
     public Color ambientColor;
     public float diffuseCoeff = 0.5f;
     public int waveNumber = 64;
@@ -62,6 +63,7 @@ public class Water : MonoBehaviour
         ReGenerateWaves();
         waveMat.SetVector("_SunDirection", sun.forward);
         waveMat.SetVector("_WaterColor", waterColor);
+        waveMat.SetFloat("_AmbientAttenuation", ambientAttenuation);
         waveMat.SetVector("_AmbientColor", ambientColor);
         waveMat.SetFloat("_DiffuseCoeff", diffuseCoeff);
     }
@@ -80,6 +82,7 @@ public class Water : MonoBehaviour
             ReGenerateWaves();
         }
         Debug.Log(sun.forward);
+        waveMat.SetFloat("_AmbientAttenuation", ambientAttenuation);
         waveMat.SetVector("_SunDirection", sun.forward);
         waveMat.SetVector("_WaterColor", waterColor);
         waveMat.SetVector("_AmbientColor", ambientColor);
