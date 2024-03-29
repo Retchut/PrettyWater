@@ -51,6 +51,8 @@ Shader "Unlit/PrettyWater"
             float _DiffuseCoeff;
             float _SpecularCoeff;
             float _SpecularConcentration;
+            float _FresnelConcentration;
+            float _FresnelStrength;
 			
 			StructuredBuffer<Wave> _Waves;
 
@@ -85,30 +87,32 @@ Shader "Unlit/PrettyWater"
                 return o;
             }
 
-float4 frag (v2f i) : SV_Target
-{
-    float3 normalizedNormal = normalize(i.normal);
-    float3 lightDir = -normalize(_SunDirection); // sun direction points from sun to vertex
-    float3 cameraDir = normalize(_WorldSpaceCameraPos - i.vertex); // vector from vertex to camera pos
-    float3 halfwayLightCameraDir = normalize(lightDir + cameraDir);
+            float4 frag (v2f i) : SV_Target
+            {
+                float3 normalizedNormal = normalize(i.normal); // although the vertex normals are normalized, it seems that the interpolated normals in the fragment might not necessarily be
+                float3 lightDir = -normalize(_SunDirection); // sun direction points from sun to vertex
+                float3 cameraDir = normalize(_WorldSpaceCameraPos - i.vertex); // vector from vertex to camera pos
+                float3 halfwayLightCameraDir = normalize(lightDir + cameraDir);
 
-    float normalDotLight = max(0.0, dot(lightDir, normalizedNormal));
-    float normalDotView = max(0.0, dot(lightDir, cameraDir));
-    
-    float3 ambient = _AmbientColor * _AmbientAttenuation;
+                float normalDotLight = max(0.0, dot(lightDir, normalizedNormal));
+                float normalDotCamera = max(0.0, dot(normalizedNormal, cameraDir));
+                
+                float3 ambient = _AmbientColor * _AmbientAttenuation;
 
-    // lambertian diffuse
-    float3 diffuseReflectance = _DiffuseCoeff / PI;
-    float3 diffuse = _WaterColor * _LightColor0.rgb * normalDotLight * diffuseReflectance;
+                // lambertian diffuse
+                float3 diffuseReflectance = _DiffuseCoeff / PI;
+                float3 diffuse = _WaterColor * _LightColor0.rgb * normalDotLight * diffuseReflectance;
 
-    // specular reflection
-    float specularIntensity = pow(max(0.0, dot(normalizedNormal, halfwayLightCameraDir)), _SpecularConcentration); // also multiplied by normalDotLight to simulate how specular highlights are more pronounced when the light hits the surface directly
-    float3 specular = _LightColor0.rgb * _SpecularCoeff * specularIntensity;
-    
+                // specular reflection
+                float specularIntensity = pow(max(0.0, dot(normalizedNormal, halfwayLightCameraDir)), _SpecularConcentration); // also multiplied by normalDotLight to simulate how specular highlights are more pronounced when the light hits the surface directly
+                float3 specular = _LightColor0.rgb * _SpecularCoeff * specularIntensity;
+                
+                // schlick fresnel
+                float fresnel = _LightColor0.rgb * pow(1 - normalDotCamera, _FresnelConcentration) * _FresnelStrength;
 
-    float3 finalColor = ambient + diffuse + specular;
-    return float4(finalColor, 1.0f);
-}
+                float3 finalColor = ambient + diffuse + specular + fresnel;
+                return float4(finalColor, 1.0f);
+            }
             ENDCG
         }
     }

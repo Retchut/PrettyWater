@@ -6,13 +6,15 @@ using static System.Runtime.InteropServices.Marshal; // required for SizeOf
 public class Water : MonoBehaviour
 {
     // Wave Properties
+    public int waveNumber = 64;
     public Color waterColor;
-    public float ambientAttenuation;
     public Color ambientColor;
+    public float ambientAttenuation;
     public float diffuseCoeff = 0.5f;
     public float specularCoeff = 0.5f;
-    public float specularConcentration = 0.5f;
-    public int waveNumber = 64;
+    public float specularConcentration = 90f;
+    public float fresnelConcentration = 90f;
+    public float fresnelStrength = 0.1f;
     private int prevWaveNumber = 64;
     private int minDirection = -1;
     private int maxDirection = 1;
@@ -92,6 +94,8 @@ public class Water : MonoBehaviour
         waveMat.SetFloat("_DiffuseCoeff", diffuseCoeff);
         waveMat.SetFloat("_SpecularCoeff", specularCoeff);
         waveMat.SetFloat("_SpecularConcentration", specularConcentration);
+        waveMat.SetFloat("_FresnelConcentration", fresnelConcentration);
+        waveMat.SetFloat("_FresnelStrength", fresnelStrength);
     }
 
     void ReGenBuffers()

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.1838367, g: 0.22854804, b: 0.3006022, a: 1}
+  m_IndirectSpecularColor: {r: 0.17893633, g: 0.22405621, b: 0.3059017, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -210,13 +210,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1083319208}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.5787836, y: -0.41757, z: 0.69251, w: 0.10523723}
+  m_LocalRotation: {x: 0.48851588, y: 0.31121898, z: -0.72199076, w: 0.37844992}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 152.837, y: -271.205, z: -45}
+  m_LocalEulerAnglesHint: {x: 125, y: 125, z: 25}
 --- !u!1 &1232628275
 GameObject:
   m_ObjectHideFlags: 0
@@ -302,13 +302,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1232628275}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.09229593, y: 0.7010574, z: -0.09229593, w: 0.7010574}
-  m_LocalPosition: {x: -1300, y: 200, z: 100}
+  m_LocalRotation: {x: 0.16042997, y: 0.37686962, z: -0.066452265, w: 0.9098438}
+  m_LocalPosition: {x: -800, y: 300, z: -800}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 15, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 20, y: 45, z: 0}
 --- !u!4 &1151388027861447103
 Transform:
   m_ObjectHideFlags: 0
@@ -405,13 +405,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70513d3f2f8a65b4fb682ce595b77aa2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  waveNumber: 64
   waterColor: {r: 0.099368125, g: 0.3499007, b: 0.7264151, a: 0}
-  ambientAttenuation: 0.1
   ambientColor: {r: 0.09019608, g: 0.32941177, b: 0.3764706, a: 0}
+  ambientAttenuation: 0.1
   diffuseCoeff: 2
   specularCoeff: 0.5
   specularConcentration: 90
-  waveNumber: 64
+  fresnelConcentration: 90
+  fresnelStrength: 0.1
   maxSpeed: 2
   maxAmplitude: 15
   minWaveLength: 2
