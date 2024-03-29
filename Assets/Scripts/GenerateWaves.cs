@@ -10,6 +10,8 @@ public class Water : MonoBehaviour
     public float ambientAttenuation;
     public Color ambientColor;
     public float diffuseCoeff = 0.5f;
+    public float specularCoeff = 0.5f;
+    public float specularConcentration = 0.5f;
     public int waveNumber = 64;
     private int prevWaveNumber = 64;
     private int minDirection = -1;
@@ -61,11 +63,7 @@ public class Water : MonoBehaviour
         waveMat = GetComponent<Renderer>().material;
         ReGenBuffers();
         ReGenerateWaves();
-        waveMat.SetVector("_SunDirection", sun.forward);
-        waveMat.SetVector("_WaterColor", waterColor);
-        waveMat.SetFloat("_AmbientAttenuation", ambientAttenuation);
-        waveMat.SetVector("_AmbientColor", ambientColor);
-        waveMat.SetFloat("_DiffuseCoeff", diffuseCoeff);
+        SetShaderVars();
     }
 
     // Update is called once per frame
@@ -82,11 +80,18 @@ public class Water : MonoBehaviour
             ReGenerateWaves();
         }
         Debug.Log(sun.forward);
-        waveMat.SetFloat("_AmbientAttenuation", ambientAttenuation);
+        SetShaderVars();
+    }
+
+    void SetShaderVars()
+    {
         waveMat.SetVector("_SunDirection", sun.forward);
         waveMat.SetVector("_WaterColor", waterColor);
         waveMat.SetVector("_AmbientColor", ambientColor);
+        waveMat.SetFloat("_AmbientAttenuation", ambientAttenuation);
         waveMat.SetFloat("_DiffuseCoeff", diffuseCoeff);
+        waveMat.SetFloat("_SpecularCoeff", specularCoeff);
+        waveMat.SetFloat("_SpecularConcentration", specularConcentration);
     }
 
     void ReGenBuffers()

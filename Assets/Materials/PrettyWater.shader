@@ -49,9 +49,10 @@ Shader "Unlit/PrettyWater"
             float _AmbientAttenuation;
             float3 _AmbientColor;
             float _DiffuseCoeff;
+            float _SpecularCoeff;
+            float _SpecularConcentration;
 			
 			StructuredBuffer<Wave> _Waves;
-
 
             float3 getPartialDerivatives(Wave wave, float3 vPos){
                 // sin(x)' = x'cos(x)
@@ -79,25 +80,35 @@ Shader "Unlit/PrettyWater"
                 float3 normalizedNormal = normalize(UnityObjectToWorldNormal(normalize(-float3(derivatives.x, -1.0f, derivatives.z))));
                 o.normal = normalizedNormal;
                 o.vertex.y += heightOffset;
-                o.vertex = UnityObjectToClipPos(o.vertex); // clip to world position
+                o.vertex = UnityObjectToClipPos(o.vertex);
                 
                 return o;
             }
 
-            float4 frag (v2f i) : SV_Target
-            {
-                float3 lightDir = -normalize(_SunDirection);
+float4 frag (v2f i) : SV_Target
+{
+    float3 normalizedNormal = normalize(i.normal);
+    float3 lightDir = -normalize(_SunDirection); // sun direction points from sun to vertex
+    float3 cameraDir = normalize(_WorldSpaceCameraPos - i.vertex); // vector from vertex to camera pos
+    float3 halfwayLightCameraDir = normalize(lightDir + cameraDir);
 
-                float ndotl = max(0.0, dot(lightDir, i.normal));
-                
-                float3 ambient = _AmbientColor * _AmbientAttenuation;
-                float3 diffuseReflectance = _DiffuseCoeff / PI;
-                float3 diffuse = _WaterColor * _LightColor0.rgb * ndotl * diffuseReflectance;
+    float normalDotLight = max(0.0, dot(lightDir, normalizedNormal));
+    float normalDotView = max(0.0, dot(lightDir, cameraDir));
+    
+    float3 ambient = _AmbientColor * _AmbientAttenuation;
 
-                float3 finalColor = ambient + diffuse;
-                // float3 finalColor = diffuse;
-                return float4(finalColor, 1.0f);
-            }
+    // lambertian diffuse
+    float3 diffuseReflectance = _DiffuseCoeff / PI;
+    float3 diffuse = _WaterColor * _LightColor0.rgb * normalDotLight * diffuseReflectance;
+
+    // specular reflection
+    float specularIntensity = pow(max(0.0, dot(normalizedNormal, halfwayLightCameraDir)), _SpecularConcentration); // also multiplied by normalDotLight to simulate how specular highlights are more pronounced when the light hits the surface directly
+    float3 specular = _LightColor0.rgb * _SpecularCoeff * specularIntensity;
+    
+
+    float3 finalColor = ambient + diffuse + specular;
+    return float4(finalColor, 1.0f);
+}
             ENDCG
         }
     }
