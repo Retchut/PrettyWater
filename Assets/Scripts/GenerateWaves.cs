@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static System.Runtime.InteropServices.Marshal; // required for SizeOf
 
-public class Water : MonoBehaviour
+public class GenerateWaves : MonoBehaviour
 {
     // Wave Properties
     public int waveNumber = 64;
@@ -77,7 +77,7 @@ public class Water : MonoBehaviour
             prevWaveNumber = waveNumber;
             ReGenerateWaves();
         }
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.P))
         {
             ReGenerateWaves();
         }
